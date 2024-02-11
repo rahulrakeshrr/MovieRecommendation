@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Movie Recommender</title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+	<style>
+		body {
+			background-color: #222;
+			color: #fff;
+			padding-top: 40px;
+			padding-bottom: 40px;
+		}
+
+		.container {
+			max-width: 600px;
+			margin: 0 auto;
+			text-align: center;
+		}
+
+		h1 {
+			font-size: 48px;
+			font-weight: 700;
+			margin-bottom: 40px;
+		}
+
+		form {
+			margin-bottom: 40px;
+		}
+
+		.form-group {
+			margin-bottom: 20px;
+		}
+
+		label {
+			font-weight: 600;
+			margin-bottom: 10px;
+		}
+
+		input {
+			font-size: 18px;
+			padding: 10px 15px;
+			border-radius: 10px;
+			border: none;
+			background-color: #444;
+			color: #fff;
+			width: 100%;
+			margin-bottom: 20px;
+		}
+
+		button[type="submit"] {
+			background-color: #ff1100;
+			color: #fff;
+			border: none;
+			border-radius: 10px;
+			padding: 10px 15px;
+			font-size: 18px;
+			font-weight: 600;
+			cursor: pointer;
+			transition: all 0.3s ease;
+		}
+
+		button[type="submit"]:hover {
+			background-color: #ff0400;
+		}
+
+		.movie {
+			background-color: #444;
+			color: #fff;
+			padding: 20px;
+			border-radius: 10px;
+			margin-bottom: 20px;
+			text-align: left;
+		}
+
+		.movie h2 {
+			font-size: 24px;
+			font-weight: 600;
+			margin-bottom: 10px;
+		}
+
+		.movie p {
+			font-size: 18px;
+			margin: 0;
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<h1>Movie Recommender</h1>
+		<form id="movie-form">
+			<div class="form-group">
+				<label for="movie-name">Movie Name:</label>
+				<input type="text" id="movie-name" name="movie-name" required>
+			</div>
+			<div class="form-group">
+				<label for="num-recommendations">Number of Recommendations:</label>
+				<input type="number" id="num-recommendations" name="num-recommendations" required>
+			</div>
+			<button type="submit">Get Recommendations</button>
+		</form>
+		<div id="recommendations"></div>
+	</div>
+
+	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+	<script>
+		const form = document.getElementById('movie-form');
+		form.addEventListener('submit', e => {
+			e.preventDefault();
+			const movieName = document.getElementById('movie-name').value;
+			const numRecommendations = document.getElementById('num-recommendations').value
+			// Make a POST request to the Flask app to get movie recommendations
+			fetch('/recommendations', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({movie_name: movieName, num_recommendations: numRecommendations})
+			})
+			.then(response => response.json())
+			.then(data => {
+				// Display the recommended movies
+				const recommendationsDiv = document.getElementById('recommendations');
+				recommendationsDiv.innerHTML = '';
+				data.forEach(movie => {
+					const movieDiv = document.createElement('div');
+					movieDiv.classList.add('movie');
+					movieDiv.innerHTML = `
+						<h2>${movie.title}</h2>
+						<p>Year: ${movie.year}</p>
+						<p>Rating: ${movie.rating}</p>
+						<p>Genres: ${movie.genres.join(', ')}</p>
+						<p>Plot: ${movie.plot}</p>
+					`;
+					recommendationsDiv.appendChild(movieDiv);
+				});
+			})
+			.catch(error => {
+				console.error('Error:', error);
+			});
+		});
+	</script>
+</body>
+</html>
